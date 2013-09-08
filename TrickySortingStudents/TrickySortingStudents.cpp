@@ -22,13 +22,11 @@ public:
 		}
 	}
 
-private:
-	static bool Validate(int rollNumber, int score) { return true; }
-
 public:
 	int GetScore() const { return _score; }
 	int GetRollNumber() const { return _rollNumber; }
 
+private:
 	string ToString() const
 	{
 		stringstream objectFormatter;
@@ -37,10 +35,19 @@ public:
 		return objectFormatter.str();
 	}
 
+	static bool Validate(int rollNumber, int score) { return true; }
+
 private:
+	friend string to_string(const Student &);
+
 	int _rollNumber;
 	int _score;
 };
+
+string to_string(const Student & student)
+{
+	return student.ToString();
+}
 
 
 int StringToNumber(const string & stringToConvert, bool &badInput)
@@ -64,7 +71,7 @@ int StringToNumber(const string & stringToConvert, bool &badInput)
 
 shared_ptr<Student> ProcessNextInputLine(const string & inputLineString)
 {
-	shared_ptr<Student> resultStudent;
+	shared_ptr<Student> sp_resultStudent;
 
 	do
 	{
@@ -91,11 +98,11 @@ shared_ptr<Student> ProcessNextInputLine(const string & inputLineString)
 			break;
 		}
 		
-		resultStudent = make_shared<Student>(rollNumberInteger, scoreInteger);
+		sp_resultStudent = make_shared<Student>(rollNumberInteger, scoreInteger);
 	}
 	while (false);
 		
-	return resultStudent;
+	return sp_resultStudent;
 }
 
 
@@ -150,8 +157,9 @@ int main()
 			for (++it_currentStudent ; it_currentStudent != it_studentsEnd; ++it_currentStudent)
 			{
 				const Student & currentSudent = *(*it_currentStudent);
+				const Student & previousStudent = *(*it_previousStudent);
 
-				if ((currentSudent.GetRollNumber() != (*it_previousStudent)->GetRollNumber()))
+				if ((currentSudent.GetRollNumber() != previousStudent.GetRollNumber()))
 				{
 					outputStudentsCollection.push_back(*it_previousStudent);
 				}
@@ -163,7 +171,7 @@ int main()
 			}
 			outputStudentsCollection.push_back(*it_previousStudent);
 
-			std::sort(outputStudentsCollection.begin(), outputStudentsCollection.end(), [](const shared_ptr<Student> & s1, const shared_ptr<Student> & s2) -> bool const {
+			std::sort(outputStudentsCollection.begin(), outputStudentsCollection.end(), [](const shared_ptr<Student> & s1, const shared_ptr<Student> & s2) -> bool {
 				return s1->GetScore() > s2->GetScore();
 			});
 		}
@@ -175,7 +183,7 @@ int main()
 	{
 		for (const auto & p_currentStudent : outputStudentsCollection)
 		{
-			cout << p_currentStudent->ToString() << std::endl;
+			cout << to_string(*p_currentStudent) << std::endl;
 		}
 	}
 }
